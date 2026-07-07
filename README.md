@@ -1,13 +1,13 @@
 # Clinical Intelligence Copilot
 
-Clinical Intelligence Copilot is a portfolio-ready healthcare AI application built with FastAPI, React, PostgreSQL, Docker, and retrieval-augmented generation patterns. It simulates a clinical documentation copilot workflow: ingesting medical records, extracting structured information, retrieving relevant evidence, and generating source-grounded answers for downstream review.
+Small full-stack project for working with uploaded clinical notes. The app ingests text or PDF records, extracts a few useful fields, chunks content for retrieval, and returns grounded answers over the uploaded material.
 
-This repository is intentionally shaped to support resume discussion around:
+The project started as a lightweight local prototype, so a few parts are intentionally simple:
 
-- AI-powered clinical document ingestion and metadata extraction
-- RAG pipeline design with chunking, embeddings, retrieval, and grounded generation
-- FastAPI service architecture for asynchronous ingestion and query workflows
-- Dockerized local deployment with reproducible developer setup
+- extraction is mostly regex/rule based
+- local development defaults to SQLite
+- embeddings can fall back to a deterministic local implementation
+- answer generation can run without a paid model API
 
 ## Stack
 
@@ -15,15 +15,6 @@ This repository is intentionally shaped to support resume discussion around:
 - Frontend: React + Vite
 - Retrieval: document chunking, deterministic hash embeddings by default, optional OpenAI embeddings
 - Containerization: Docker + Docker Compose
-
-## Architecture
-
-1. Upload clinical notes through the React UI or FastAPI endpoint.
-2. Persist document metadata in PostgreSQL and store raw uploads on disk.
-3. Extract lightweight patient metadata and clinical entities with rule-based parsing.
-4. Chunk note text, generate embeddings, and save chunk vectors for retrieval.
-5. Rank relevant chunks against a user query and return evidence snippets.
-6. Generate a grounded answer using either a local mock synthesizer or an OpenAI-compatible LLM API.
 
 ## Features
 
@@ -34,13 +25,12 @@ This repository is intentionally shaped to support resume discussion around:
 - Produce source-grounded answers with citations
 - Run locally with mock LLM mode or with an OpenAI-compatible API key
 
-## API Surface
+## Notes On The Current Implementation
 
-- `POST /documents/upload`: ingest a clinical record
-- `GET /documents`: list indexed records and extracted metadata
-- `POST /retrieve`: return top-k semantic matches for a query
-- `POST /ask`: return a grounded answer with citations
-- `GET /health`: service health check
+- `POST /documents/upload` stores the raw file on disk and indexes chunks into the database.
+- `POST /retrieve` does an in-process similarity ranking over stored chunk vectors.
+- `POST /ask` reuses retrieval results and either calls an OpenAI-compatible chat endpoint or falls back to a local grounded summary.
+- Right now the vector search is simple and lives in the app layer. If this grew, pgvector or a dedicated vector store would be the next obvious cleanup.
 
 ## Local Development
 
@@ -75,15 +65,6 @@ Frontend: `http://localhost:5173`
 
 Backend docs: `http://localhost:8000/docs`
 
-## Suggested Demo Narrative
-
-Use this framing when talking through the project:
-
-1. A clinician or operations user uploads a progress note or discharge summary.
-2. The backend extracts metadata, chunks the note, and indexes vectorized text for search.
-3. A user asks for targeted information such as medications, follow-up plans, or abnormal labs.
-4. The application retrieves the most relevant evidence and returns a source-grounded answer rather than an ungrounded generation.
-
 ## Optional LLM API Setup
 
 Create `.env` in the repository root:
@@ -109,3 +90,4 @@ If no API key is supplied, the app still works using a deterministic local embed
 - Default local development uses SQLite for convenience.
 - Docker Compose uses PostgreSQL to match the production-style architecture described in the project summary.
 - The embedding and answer-generation layers support OpenAI-compatible APIs, but the application remains fully demoable without paid API access.
+- There are still obvious places to harden things: better PDF parsing, more robust extraction, and a real vector index once the dataset size grows.

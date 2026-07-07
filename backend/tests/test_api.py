@@ -50,3 +50,25 @@ def test_ingestion_retrieval_and_qa_flow() -> None:
     answer_payload = ask_response.json()
     assert "follow-up" in answer_payload["answer"].lower()
     assert len(answer_payload["citations"]) >= 1
+
+
+def test_empty_retrieval_before_uploads() -> None:
+    reset_db()
+    response = client.post("/retrieve", json={"query": "anything", "top_k": 3})
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_unknown_question_returns_grounded_fallback() -> None:
+    reset_db()
+    with sample_file.open("rb") as handle:
+        client.post(
+            "/documents/upload",
+            files={"file": ("sample_clinical_note.txt", handle, "text/plain")},
+        )
+
+    response = client.post("/ask", json={"question": "Does the chart mention a surgery?", "top_k": 3})
+    assert response.status_code == 200
+    payload = response.json()
+    assert "answer" in payload
+    assert len(payload["citations"]) >= 1

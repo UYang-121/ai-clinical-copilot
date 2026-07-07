@@ -44,6 +44,7 @@ def chunk_text(text: str, size: int, overlap: int) -> list[str]:
 
 
 def _hash_embedding(text: str, dimensions: int = 128) -> list[float]:
+    # Cheap local fallback so the retrieval path still works without an API key.
     vector = [0.0] * dimensions
     for token in re.findall(r"[a-zA-Z0-9]+", text.lower()):
         digest = hashlib.sha256(token.encode("utf-8")).digest()
@@ -85,6 +86,8 @@ def _pick_first(patterns: list[str], text: str) -> str | None:
 
 
 def extract_entities(text: str) -> dict:
+    # This is intentionally lightweight for now. If the document set gets broader,
+    # this should probably move behind a dedicated extraction step.
     medications = sorted(set(re.findall(r"(metformin|lisinopril|atorvastatin|albuterol|insulin)", text, flags=re.I)))
     conditions = sorted(set(re.findall(r"(diabetes|hypertension|asthma|hyperlipidemia|anemia)", text, flags=re.I)))
     allergies = sorted(set(re.findall(r"allerg(?:y|ies)\s*:\s*([^.\\n]+)", text, flags=re.I)))
@@ -130,7 +133,7 @@ def build_grounded_answer(question: str, matches: list[DocumentChunk]) -> str:
         evidence_lines.append(f"- {chunk.document.filename}: {snippet}")
     return (
         f"Question: {question}\n"
-        "Grounded answer based on retrieved clinical context:\n"
+        "Answer based on retrieved note content:\n"
         + "\n".join(evidence_lines)
         + "\nSynthesis: The retrieved notes indicate the answer should be limited to the cited excerpts above."
     )
@@ -216,7 +219,8 @@ async def ingest_document(
 async def retrieve_chunks(db: Session, query: str, top_k: int) -> list[tuple[DocumentChunk, float]]:
     query_embedding = await embed_text(query)
     chunks = db.scalars(select(DocumentChunk).order_by(DocumentChunk.id)).all()
+    # Fine for a small local prototype. This is the first thing to replace if the
+    # number of chunks grows enough to make linear scans annoying.
     scored = [(chunk, cosine_similarity(query_embedding, chunk.embedding)) for chunk in chunks]
     scored.sort(key=lambda item: item[1], reverse=True)
     return scored[:top_k]
-

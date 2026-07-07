@@ -22,8 +22,8 @@ function Section({ title, children }) {
 
 export default function App() {
   const [documents, setDocuments] = useState([]);
-  const [query, setQuery] = useState('Which records mention diabetes medication adjustments or follow-up monitoring?');
-  const [question, setQuestion] = useState('Summarize the documented follow-up plan and supporting evidence.');
+  const [query, setQuery] = useState('diabetes medication follow-up');
+  const [question, setQuestion] = useState('What follow-up plan is documented?');
   const [retrievalResults, setRetrievalResults] = useState([]);
   const [answer, setAnswer] = useState(null);
   const [status, setStatus] = useState('Ready');
@@ -82,19 +82,19 @@ export default function App() {
   return (
     <main className="app-shell">
       <header className="hero">
-        <p className="eyebrow">Healthcare AI Workflow Demo</p>
+        <p className="eyebrow">Clinical Note Search</p>
         <h1>Clinical Intelligence Copilot</h1>
         <p className="lede">
-          A portfolio-grade RAG application for medical record ingestion, structured extraction,
-          semantic retrieval, and source-grounded clinical question answering.
+          Upload notes, extract a few structured fields, search semantically, and ask grounded
+          questions against the indexed records.
         </p>
         <div className="status-pill">{status}</div>
       </header>
 
       <div className="grid">
-        <Section title="Clinical Record Ingestion">
+        <Section title="Ingestion">
           <label className="upload-box">
-            <span>Upload PDF or text-based encounter notes</span>
+            <span>Upload PDF or text notes</span>
             <input type="file" accept=".pdf,.txt,.md" onChange={handleUpload} />
           </label>
           <div className="document-list">
@@ -112,9 +112,9 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Evidence Retrieval">
+        <Section title="Retrieval">
           <textarea value={query} onChange={(event) => setQuery(event.target.value)} rows={4} />
-          <button onClick={handleRetrieve}>Run Semantic Search</button>
+          <button onClick={handleRetrieve}>Retrieve Evidence</button>
           <div className="result-list">
             {retrievalResults.map((result) => (
               <article className="result-card" key={result.chunk_id}>
@@ -128,9 +128,9 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Source-Grounded Clinical Q&A">
+        <Section title="Grounded Q&A">
           <textarea value={question} onChange={(event) => setQuestion(event.target.value)} rows={4} />
-          <button onClick={handleAsk}>Generate Grounded Answer</button>
+          <button onClick={handleAsk}>Generate Answer</button>
           {answer && (
             <div className="answer-card">
               <pre>{answer.answer}</pre>
