@@ -1,6 +1,13 @@
-# AI Clinical Copilot
+# Clinical Intelligence Copilot
 
-AI Clinical Copilot is a full-stack clinical document assistant built with FastAPI, React, PostgreSQL, Docker, and retrieval-augmented generation patterns. The app supports medical record upload, lightweight entity extraction, semantic retrieval, and source-grounded question answering.
+Clinical Intelligence Copilot is a portfolio-ready healthcare AI application built with FastAPI, React, PostgreSQL, Docker, and retrieval-augmented generation patterns. It simulates a clinical documentation copilot workflow: ingesting medical records, extracting structured information, retrieving relevant evidence, and generating source-grounded answers for downstream review.
+
+This repository is intentionally shaped to support resume discussion around:
+
+- AI-powered clinical document ingestion and metadata extraction
+- RAG pipeline design with chunking, embeddings, retrieval, and grounded generation
+- FastAPI service architecture for asynchronous ingestion and query workflows
+- Dockerized local deployment with reproducible developer setup
 
 ## Stack
 
@@ -8,6 +15,15 @@ AI Clinical Copilot is a full-stack clinical document assistant built with FastA
 - Frontend: React + Vite
 - Retrieval: document chunking, deterministic hash embeddings by default, optional OpenAI embeddings
 - Containerization: Docker + Docker Compose
+
+## Architecture
+
+1. Upload clinical notes through the React UI or FastAPI endpoint.
+2. Persist document metadata in PostgreSQL and store raw uploads on disk.
+3. Extract lightweight patient metadata and clinical entities with rule-based parsing.
+4. Chunk note text, generate embeddings, and save chunk vectors for retrieval.
+5. Rank relevant chunks against a user query and return evidence snippets.
+6. Generate a grounded answer using either a local mock synthesizer or an OpenAI-compatible LLM API.
 
 ## Features
 
@@ -17,6 +33,14 @@ AI Clinical Copilot is a full-stack clinical document assistant built with FastA
 - Retrieve top matching evidence snippets for user queries
 - Produce source-grounded answers with citations
 - Run locally with mock LLM mode or with an OpenAI-compatible API key
+
+## API Surface
+
+- `POST /documents/upload`: ingest a clinical record
+- `GET /documents`: list indexed records and extracted metadata
+- `POST /retrieve`: return top-k semantic matches for a query
+- `POST /ask`: return a grounded answer with citations
+- `GET /health`: service health check
 
 ## Local Development
 
@@ -51,6 +75,15 @@ Frontend: `http://localhost:5173`
 
 Backend docs: `http://localhost:8000/docs`
 
+## Suggested Demo Narrative
+
+Use this framing when talking through the project:
+
+1. A clinician or operations user uploads a progress note or discharge summary.
+2. The backend extracts metadata, chunks the note, and indexes vectorized text for search.
+3. A user asks for targeted information such as medications, follow-up plans, or abnormal labs.
+4. The application retrieves the most relevant evidence and returns a source-grounded answer rather than an ungrounded generation.
+
 ## Optional LLM API Setup
 
 Create `.env` in the repository root:
@@ -71,11 +104,8 @@ If no API key is supplied, the app still works using a deterministic local embed
 3. Run retrieval with a query like `diabetes medication`.
 4. Ask `What follow-up plan is documented?`
 
-## Resume Alignment
+## Notes
 
-This project demonstrates:
-
-- AI-powered clinical document ingestion and metadata extraction
-- RAG-style chunking, embeddings, retrieval, and grounded generation
-- FastAPI service design for ingestion, retrieval, and Q&A
-- Dockerized local deployment with reproducible setup instructions
+- Default local development uses SQLite for convenience.
+- Docker Compose uses PostgreSQL to match the production-style architecture described in the project summary.
+- The embedding and answer-generation layers support OpenAI-compatible APIs, but the application remains fully demoable without paid API access.
