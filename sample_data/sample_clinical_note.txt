@@ -1,0 +1,16 @@
+Patient Name: Maria Thompson
+Date: 2026-03-18
+Document Type: Progress Note
+
+Chief Complaint:
+Follow-up for type 2 diabetes and hypertension management.
+
+Assessment:
+Patient reports improved home glucose control. A1C 7.1. BP 128/78 in clinic.
+Current medications include metformin and lisinopril. No acute symptoms today.
+Allergies: Penicillin.
+
+Plan:
+Continue metformin 1000 mg twice daily and lisinopril 10 mg daily.
+Repeat A1C and LDL in 3 months. Follow-up with primary care in 12 weeks.
+
